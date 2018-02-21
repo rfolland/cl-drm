@@ -5,25 +5,94 @@
   (:export
    mode-set-crtc
    mode-free-crtc
+   mode-free-encoder
    mode-add-framebuffer
    mode-remove-framebuffer
    find-display-configuration
    mode-mode-info
-   mode-connector
+   mode-get-connector
+   mode-free-connector
+   mode-free-resources
    mode-crtc
-   hdisplay
-   vdisplay
+   mode-free-crtc
+   mode-get-crtc
+   mode-set-crtc
+   mode-remove-framebuffer
+   mode-get-encoder
+   get-mode-info-hdisplay
+   get-mode-info-vdisplay
    crtc-id
    mode
+   mode-get-resources
    x
    y
    buffer-id
    mode-info
+   mode-mode-info-get-clock
    connector-id
+   connected-p
    crtc
    mode-page-flip
    handle-event
    event-context
    version
    vblank-handler
-   page-flip-handler))
+   page-flip-handler
+   get-res-count-crtcs
+   get-res-crtc
+   get-modes
+   get-mode-clock
+   get-mode-vrefresh
+   get-mode-flags
+   get-mode-name
+   mode-preferred-p
+   get-connectors
+   find-connected-connectors
+   find-connectors
+   get-connector-id
+   get-connector-mode
+   get-connector-encoder-id
+   get-connector-encoders
+   get-connector-count-encoders
+   get-connector-count-modes
+   get-connector-count-props
+   get-connector-property
+   get-connector-prop-value
+   get-property-id
+   get-property-name
+   get-property-count-blobs
+   get-property-blob-id
+   mode-get-property-blob
+   get-blob-id
+   get-blob-data
+   mode-connector-set-property
+   get-encoder-id
+   get-encoder-crtc-id
+   get-encoder-possible-crtcs
+   drm-mode-create-dumb
+   drm-mode-destroy-dumb
+   drm-mode-map-dumb
+   DRM_IOCTL_MODE_CREATE_DUMB
+   mode-add-framebuffer-2
+   DRM_FORMAT_YUYV
+   DRM_IOCTL_MODE_MAP_DUMB
+   modeset-prepare
+   modeset-set-crtc
+   modeset-cleanup
+   modeset-video
+   modeset-dev
+   drm-mode-create-dumb-set-width
+   drm-mode-create-dumb-set-height
+   drm-mode-create-dumb-set-bpp
+   drm-mode-create-dumb-get-pitch
+   drm-mode-create-dumb-get-size
+   drm-mode-create-dumb-get-handle
+   drm-mode-map-dumb-set-handle
+   drm-mode-map-dumb-get-offset
+   drm-mode-destroy-dumb-set-handle
+   strerror
+   mode-crtc-get-crtc-id
+   mode-crtc-get-buffer-id
+   mode-crtc-get-x
+   mode-crtc-get-y
+   mode-crtc-get-mode))
