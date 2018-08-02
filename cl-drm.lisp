@@ -26,14 +26,14 @@
             (ash (char-code (second set)) 8)
             (char-code (first set)))))
 
-(defconstant DRM_FORMAT_XRGB8888 (fourcc-code '(#\X #\R #\2 #\4))) ;[31:0] x:R:G:B 8:8:8:8 little endian
-;; #define DRM_FORMAT_XBGR8888	fourcc_code('X', 'B', '2', '4') /* [31:0] x:B:G:R 8:8:8:8 little endian */
-;; #define DRM_FORMAT_RGBX8888	fourcc_code('R', 'X', '2', '4') /* [31:0] R:G:B:x 8:8:8:8 little endian */
-;; #define DRM_FORMAT_BGRX8888	fourcc_code('B', 'X', '2', '4') /* [31:0] B:G:R:x 8:8:8:8 little endian */
-(defconstant DRM_FORMAT_YUYV (fourcc-code '(#\Y #\U #\Y #\V))) ;[31:0] Cr0:Y1:Cb0:Y0 8:8:8:8 little endian
-;; #define DRM_FORMAT_YVYU  fourcc_code('Y', 'V', 'Y', 'U') /* [31:0] Cb0:Y1:Cr0:Y0 8:8:8:8 little endian */
-;; #define DRM_FORMAT_UYVY  fourcc_code('U', 'Y', 'V', 'Y') /* [31:0] Y1:Cr0:Y0:Cb0 8:8:8:8 little endian */
-;; #define DRM_FORMAT_VYUY  fourcc_code('V', 'Y', 'U', 'Y') /* [31:0] Y1:Cb0:Y0:Cr0 8:8:8:8 little endian */
+;; (defconstant DRM_FORMAT_XRGB8888 (fourcc-code '(#\X #\R #\2 #\4))) ;[31:0] x:R:G:B 8:8:8:8 little endian
+;; ;; #define DRM_FORMAT_XBGR8888	fourcc_code('X', 'B', '2', '4') /* [31:0] x:B:G:R 8:8:8:8 little endian */
+;; ;; #define DRM_FORMAT_RGBX8888	fourcc_code('R', 'X', '2', '4') /* [31:0] R:G:B:x 8:8:8:8 little endian */
+;; ;; #define DRM_FORMAT_BGRX8888	fourcc_code('B', 'X', '2', '4') /* [31:0] B:G:R:x 8:8:8:8 little endian */
+;; (defconstant DRM_FORMAT_YUYV (fourcc-code '(#\Y #\U #\Y #\V))) ;[31:0] Cr0:Y1:Cb0:Y0 8:8:8:8 little endian
+;; ;; #define DRM_FORMAT_YVYU  fourcc_code('Y', 'V', 'Y', 'U') /* [31:0] Cb0:Y1:Cr0:Y0 8:8:8:8 little endian */
+;; ;; #define DRM_FORMAT_UYVY  fourcc_code('U', 'Y', 'V', 'Y') /* [31:0] Y1:Cr0:Y0:Cb0 8:8:8:8 little endian */
+;; ;; #define DRM_FORMAT_VYUY  fourcc_code('V', 'Y', 'U', 'Y') /* [31:0] Y1:Cb0:Y0:Cr0 8:8:8:8 little endian */
 
 (defcenum mode-connection
   (:connected 1)
@@ -124,6 +124,20 @@
   (count-encoders :int)
   (encoders (:pointer :uint32)))
 
+(defcstruct drm-mode-create-dumb
+  (height :uint32)
+  (width :uint32)
+  (bpp :uint32)
+  (flags :uint32)
+  (handle :uint32)
+  (pitch :uint32)
+  (size :uint64))
+
+(defcstruct drm-mode-map-dumb
+  (handle :uint32)
+  (pad :uint32)
+  (offset :uint64))
+
 (defun drm-mode-create-dumb-set-width (req width)
   (setf (foreign-slot-value req '(:struct drm:drm-mode-create-dumb) 'width) width))
 
@@ -141,20 +155,6 @@
 
 (defun drm-mode-create-dumb-get-handle (req)
   (foreign-slot-value req '(:struct drm:drm-mode-create-dumb) 'handle))
-
-(defcstruct drm-mode-create-dumb
-  (height :uint32)
-  (width :uint32)
-  (bpp :uint32)
-  (flags :uint32)
-  (handle :uint32)
-  (pitch :uint32)
-  (size :uint64))
-
-(defcstruct drm-mode-map-dumb
-  (handle :uint32)
-  (pad :uint32)
-  (offset :uint64))
 
 (defun drm-mode-map-dumb-set-handle (req handle)
   (setf (foreign-slot-value req '(:struct drm:drm-mode-map-dumb) 'handle) handle))
@@ -178,6 +178,17 @@
 
 (defcfun ("drmModeGetResources" mode-get-resources) (:pointer (:struct mode-res))
   (fd :int))
+
+(defcstruct mode-crtc
+  (crtc-id :uint32)
+  (buffer-id :uint32)
+  (x :uint32)
+  (y :uint32)
+  (width :uint32)
+  (height :uint32)
+  (mode-valid :int)
+  (mode (:struct mode-mode-info))
+  (gamma-size :int))
 
 (defcfun ("drmModeGetCrtc" mode-get-crtc) (:pointer (:struct mode-crtc))
   (fd :int)
@@ -241,21 +252,6 @@
     (loop :for i :from 0 :to (- count-modes 1)
        :collecting (mem-aptr modes '(:struct mode-mode-info) i))))
 
-(defcstruct mode-crtc
-  (crtc-id :uint32)
-  (buffer-id :uint32)
-  (x :uint32)
-  (y :uint32)
-  (width :uint32)
-  (height :uint32)
-  (mode-valid :int)
-  (mode (:struct mode-mode-info))
-  (gamma-size :int))
-
-(defcfun ("drmModeGetCrtc" mode-get-crtc) (:pointer (:struct mode-crtc))
-  (fd :int)
-  (crtc-id :uint32))
-
 (defun mode-crtc-get-crtc-id (crtc)
   (cffi:foreign-slot-value crtc '(:struct mode-crtc) 'crtc-id))
 
@@ -273,12 +269,6 @@
 
 (defun connected-p (connector)
   (eql (foreign-slot-value connector '(:struct mode-connector) 'connection) :connected))
-
-(defun find-encoder (fd connector)
-  (let ((encoder-id (foreign-slot-value connector '(:struct mode-connector) 'encoder-id)))
-    (if (zerop encoder-id)
-        (error "No encoder found")
-        (mode-get-encoder fd encoder-id))))
 
 (defun get-res-count-crtcs (res)
   (foreign-slot-value res '(:struct mode-res) 'count-crtcs))
@@ -364,12 +354,6 @@
 
 (defun get-encoder-possible-crtcs (encoder)
   (foreign-slot-value encoder '(:struct mode-encoder) 'possible-crtcs))
-
-(defun get-modes (connector)
-  (let ((count-modes (foreign-slot-value connector '(:struct mode-connector)  'count-modes))
-        (modes (foreign-slot-value connector '(:struct mode-connector) 'modes)))
-    (loop :for i :from 0 :to (- count-modes 1)
-       :collecting (mem-aptr modes '(:struct mode-mode-info) i))))
 
 (defun get-connector-count-modes (connector)
   (foreign-slot-value connector '(:struct mode-connector)  'count-modes))
